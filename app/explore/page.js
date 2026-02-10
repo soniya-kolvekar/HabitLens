@@ -44,7 +44,7 @@ export default function ExplorePage() {
             title: "Habit Replacement",
             description: "Swap negative loops for positive routines with scientific methods.",
             icon: RefreshCw,
-            href: "#",
+            href: "/habit-replacement",
             color: "text-blue-300",
             active: false
         }
