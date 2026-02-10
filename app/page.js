@@ -1,65 +1,180 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+
+export default function LandingPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-[#3A1C4A] to-[#8E5AA8] text-white relative overflow-hidden">
+      {/* subtle glow background */}
+      <div className="absolute inset-0 opacity-30 blur-3xl bg-[radial-gradient(circle_at_20%_20%,#ffffff22,transparent_40%),radial-gradient(circle_at_80%_0%,#ffffff22,transparent_40%)]" />
+
+      {/* Navbar */}
+      <nav className="relative z-10 flex items-center justify-between px-8 py-2">
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.jpeg"
+            alt="HabitLens Logo"
+            width={140}
+            height={40}
+            className="object-contain"
+            priority
+          />
+        </Link>
+        <div className="space-x-3">
+          <Link href="/login">
+            <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl px-4 py-2">Login</Button>
+          </Link>
+          <Link href="/signup">
+            <Button className="bg-white/90 text-purple-800 hover:bg-white rounded-xl shadow-lg px-4 py-2">
+              Get Started
+            </Button>
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 flex flex-col items-center text-center px-6 pt-24 pb-20">
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className="text-4xl md:text-6xl font-semibold leading-tight max-w-3xl tracking-tight"
+        >
+          Understand Your Habits.
+          <br className="hidden md:block" />
+          Shape Your Future.
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.7 }}
+          className="mt-6 text-lg md:text-xl text-purple-100/90 max-w-2xl leading-relaxed"
+        >
+          A calm, intelligent space that helps you see how small daily actions
+          quietly influence your health, focus, and emotional well‑being over
+          time.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.7 }}
+          className="mt-10 flex flex-col sm:flex-row gap-4"
+        >
+          <Link href="/signup">
+            <Button className="bg-white text-purple-800 text-lg px-8 py-4 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">
+              Try Simulation
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button
+              variant="ghost"
+              className="border border-white/30 text-white text-lg px-8 py-4 rounded-2xl hover:bg-white/10"
+            >
+              Explore Features
+            </Button>
+          </Link>
+        </motion.div>
+
+        {/* glass preview panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.8 }}
+          className="mt-16 w-full max-w-4xl"
+        >
+          <div className="rounded-3xl bg-white/10 backdrop-blur-2xl border border-white/20 p-8 shadow-2xl">
+            <p className="text-purple-100 text-sm uppercase tracking-widest mb-4">
+              Future Insight Preview
+            </p>
+            <div className="grid md:grid-cols-3 gap-4 text-left">
+              {[
+                "Sleep improves focus by 18%",
+                "Reduced screen time lowers stress",
+                "Daily walks increase energy levels",
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl bg-black/20 border border-white/10 p-4 text-sm text-purple-50"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Features Section */}
+      <section className="relative z-10 px-8 pb-28 grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {[
+          {
+            title: "Consequence Prediction",
+            desc: "Quietly understand the short‑ and long‑term impact of everyday habits.",
+          },
+          {
+            title: "Future Timeline",
+            desc: "See gentle projections of where your current routine may lead.",
+          },
+          {
+            title: "Guided Improvement",
+            desc: "Receive small, realistic steps toward a healthier daily rhythm.",
+          },
+        ].map((feature, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.12 }}
+            viewport={{ once: true }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <Card className="bg-white/10 border-white/20 backdrop-blur-xl rounded-3xl shadow-xl hover:bg-white/15 transition-colors">
+              <CardContent className="p-7">
+                <h3 className="text-xl font-semibold mb-2 tracking-tight">
+                  {feature.title}
+                </h3>
+                <p className="text-purple-100/90 leading-relaxed">
+                  {feature.desc}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 text-center pb-24 px-6">
+        <h3 className="text-3xl md:text-4xl font-semibold tracking-tight">
+          Begin with one small change
+        </h3>
+        <p className="mt-4 text-purple-100/90">
+          Your future is shaped quietly by what you do today.
+        </p>
+        <Link href="/signup">
+          <Button className="mt-8 bg-white text-purple-800 text-lg px-10 py-4 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">
+            Create Free Account
+          </Button>
+        </Link>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/20 text-center py-8 text-purple-200/80 text-sm">
+        © {new Date().getFullYear()} HabitScope · Designed for mindful growth
+      </footer>
     </div>
   );
 }
