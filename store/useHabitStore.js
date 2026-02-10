@@ -119,6 +119,15 @@ const useHabitStore = create((set, get) => ({
         });
         get().calculateStreak(get().dailyEntries);
     },
+
+    // Reset My Life Feature
+    isResetModalOpen: false,
+    isGeneratingReset: false,
+    resetPlan: null,
+
+    setResetModalOpen: (isOpen) => set({ isResetModalOpen: isOpen }),
+    setGeneratingReset: (isGenerating) => set({ isGeneratingReset: isGenerating }),
+    setResetPlan: (plan) => set({ resetPlan: plan }),
 }));
 
 export default useHabitStore;

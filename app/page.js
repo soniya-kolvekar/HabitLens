@@ -75,12 +75,12 @@ export default function LandingPage() {
           transition={{ delay: 0.4, duration: 0.7 }}
           className="mt-10 flex flex-col sm:flex-row gap-4"
         >
-          <Link href="/signup">
+          <Link href="/feature1">
             <Button className="bg-white text-purple-800 text-lg px-8 py-4 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">
               Try Simulation
             </Button>
           </Link>
-          <Link href="/login">
+          <Link href="/explore">
             <Button
               variant="ghost"
               className="border border-white/30 text-white text-lg px-8 py-4 rounded-2xl hover:bg-white/10"

@@ -6,6 +6,8 @@ import DailyCheckIn from './DailyCheckIn';
 import LifeBalanceMeter from './LifeBalanceMeter';
 import CalendarHistory from './CalendarHistory';
 import DayDetailModal from './DayDetailModal';
+import ResetButton from './ResetButton';
+import ResetModal from './ResetModal';
 import { auth } from '../../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -49,6 +51,7 @@ export default function Dashboard() {
                         <span className="text-sm font-semibold text-purple-200">Streak:</span>
                         <span className="text-xl font-bold text-white">🔥 {streak} Days</span>
                     </div>
+                    <ResetButton />
                 </header>
 
                 {/* Main Grid */}
@@ -100,6 +103,7 @@ export default function Dashboard() {
                 onClose={() => setIsModalOpen(false)}
                 data={modalData}
             />
+            <ResetModal />
         </div>
     );
 }
