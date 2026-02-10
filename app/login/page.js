@@ -21,15 +21,14 @@ export default function Login() {
       console.error("Logout failed", err);
     }
   };
-const [hoverBg, setHoverBg] = useState(false);
+  const [hoverBg, setHoverBg] = useState(false);
   return (
-   <div  onMouseEnter={() => setHoverBg(true)}
+    <div onMouseEnter={() => setHoverBg(true)}
       onMouseLeave={() => setHoverBg(false)}
       className={`min-h-screen transition-all duration-700 ease-in-out
-        ${
-          hoverBg
-            ? "bg-gradient-to-b from-[#5A2A6E] to-[#B58BC6]"
-            : "bg-gradient-to-b from-[#3A1C4A] to-[#8E5AA8]"
+        ${hoverBg
+          ? "bg-gradient-to-b from-[#5A2A6E] to-[#B58BC6]"
+          : "bg-gradient-to-b from-[#3A1C4A] to-[#8E5AA8]"
         }
       `}>
 
@@ -66,7 +65,7 @@ const [hoverBg, setHoverBg] = useState(false);
             onClick={async () => {
               try {
                 await login(email, password);
-                router.replace("/home");     
+                router.replace("/feature1");
               } catch (err) {
                 setError("Invalid email or password");
               }
@@ -75,35 +74,7 @@ const [hoverBg, setHoverBg] = useState(false);
             Login
           </button>
 
-          <button
-            className="md:w-50 w-40 h-13 bg-[#C9A3D9] rounded-[5px] mt-5 text-black hover:text-white justify-center items-center md:mx-20 hover:bg-[#5A2A6E]"
-            onClick={async () => {
-              try {
-                await createAccount(email, password);
-                router.replace("/signup");
-              } catch {
-                setError("Signup failed");
-              }
-            }}
-          >
-            Sign Up
-          </button>
 
-          <button
-            className="md:w-50 w-50 h-13 bg-[#C9A3D9] rounded-[5px] mt-5 text-black hover:text-white justify-center items-center md:mx-20 hover:bg-[#5A2A6E]"
-            onClick={async () => {
-              try {
-                await resetEmail(email);
-                alert("Reset email sent");
-              } catch {
-                setError("Reset failed");
-              }
-            }}
-          >
-            Send Reset Email
-          </button>
-
-        
 
           <div className="flex flex-row">
             <h6 className="text-gray-500 ml-10 mt-5">
@@ -118,7 +89,7 @@ const [hoverBg, setHoverBg] = useState(false);
           </div>
         </div>
 
-      
+
       </div>
     </div>
   );

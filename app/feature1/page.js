@@ -1,10 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { auth, db } from "../../firebase";
+import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function Page() {
   const [habit, setHabit] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
 
   const analyzeHabit = async () => {
@@ -20,6 +31,20 @@ export default function Page() {
 
       const data = await res.json();
       setResult(data); // data contains result + theme
+
+      if (user) {
+        try {
+          await addDoc(collection(db, "users", user.uid, "habits"), {
+            habit: habit,
+            analysis: data.result || data.analysis || data,
+            theme: data.theme || null,
+            timestamp: serverTimestamp(),
+          });
+          console.log("Habit saved to profile!");
+        } catch (error) {
+          console.error("Error saving habit:", error);
+        }
+      }
     } catch (err) {
       console.error(err);
       setResult({
@@ -36,8 +61,8 @@ export default function Page() {
   };
 
   return (
-   <div className=" h-screen flex justify-center items-center  bg-gradient-to-b from-[#3A1C4A] to-[#8E5AA8]">
-      <div className=" max-w-lg py-20  p-8 bg-[#3A1C4A] backdrop-blur-md rounded-3xl  shadow-2xl ">
+    <div className="min-h-screen flex justify-center items-center bg-gradient-to-b from-[#3A1C4A] to-[#8E5AA8] p-4 overflow-y-auto">
+      <div className="w-full max-w-4xl py-10 p-8 bg-[#3A1C4A] backdrop-blur-md rounded-3xl shadow-2xl">
         <h1
           className="text-4xl font-bold mb-6 mt-10  mt-5 ml-10  text-center"
           style={{ fontFamily: "Marcellus, serif", color: "#9987a3" }}
@@ -69,6 +94,8 @@ export default function Page() {
                 "linear-gradient(135deg, #5A2A6E 0%, #B58BC6 100%)",
               color: result.theme?.color || "#30113f",
               fontFamily: result.theme?.font || "Marcellus, serif",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
             }}
           >
             {result.result || result.analysis || result}

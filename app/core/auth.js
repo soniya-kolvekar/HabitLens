@@ -13,9 +13,9 @@ export async function createAccount(email, password) {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
 
-    await setDoc(doc(database, "users", result.user.uid), {
-      name: "",
-      profileCompleted: false,
+    await setDoc(doc(db, "users", result.user.uid), {
+      name: email.split("@")[0],
+      email: email,
       createdAt: new Date(),
     });
 
@@ -23,11 +23,11 @@ export async function createAccount(email, password) {
     return result;
 
   } catch (error) {
-    console.log(error);
+    console.error("Error referencing Create Account:", error.code, error.message);
     throw error;
   }
 }
- 
+
 export async function login(email, password) {
   try {
     return await signInWithEmailAndPassword(auth, email, password);
@@ -36,11 +36,11 @@ export async function login(email, password) {
     throw error;
   }
 }
- 
+
 export async function logout() {
   try {
     await signOut(auth);
-    
+
   } catch (error) {
     console.log(error);
     throw error;
@@ -64,7 +64,7 @@ export function listenToAuthChanges(callback) {
 
 
 export function getCurrentUser() {
-  const auth=getAuth();
- 
+  const auth = getAuth();
+
   return auth.currentUser;
 }

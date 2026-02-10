@@ -1,34 +1,51 @@
 import { NextResponse } from "next/server";
-
 export async function POST(req) {
-  const { habit } = await req.json();
+  try {
+    const { habit } = await req.json();
 
-  const requestBody = {
-    contents: [{
-      parts: [{ text: `Explain the long-term impact of this habit: ${habit}` }]
-    }],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 300
+    const requestBody = {
+      contents: [{
+        parts: [{ text: `Provide a very detailed, extensive, and comprehensive analysis of the long-term impact of this habit: ${habit}. The response should be lengthy and cover physiological, psychological, and lifestyle effects in great depth. Do not worry about word count, allow the response to be as detailed as possible to explain all consequences.` }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2500
+      }
+    };
+
+    console.log("Habit received:", habit);
+    console.log("API Key present:", !!process.env.GEMINI_API_KEY);
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("API Error Status:", response.status, response.statusText);
+      console.error("API Error Body:", errorText);
+      return NextResponse.json({ result: `Error: ${response.status} ${response.statusText}`, details: errorText }, { status: response.status });
     }
-  };
 
-  console.log("Habit received:", habit);
-  console.log("Request body:", JSON.stringify(requestBody, null, 2));
+    const data = await response.json();
+    console.log("API response:", JSON.stringify(data, null, 2));
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody)
+    const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!resultText) {
+      console.error("Unexpected API response structure:", data);
+      return NextResponse.json({ result: "No detailed response received from AI." }, { status: 500 });
     }
-  );
 
-  const data = await response.json();
-  console.log("API response:", JSON.stringify(data, null, 2));
-
-  return NextResponse.json({
-    result: data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response"
-  });
+    return NextResponse.json({
+      result: resultText
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    return NextResponse.json({ result: "Internal Server Error", error: error.message }, { status: 500 });
+  }
 }
