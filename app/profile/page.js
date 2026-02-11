@@ -56,7 +56,7 @@ export default function Profile() {
                 }
             });
 
-            // Listener for Habits (Analysis History)
+            
             unsubscribeHabits = onSnapshot(collection(db, "users", currentUser.uid, "habits"), (snapshot) => {
                 const habitsList = snapshot.docs.map(doc => ({
                     id: doc.id,
