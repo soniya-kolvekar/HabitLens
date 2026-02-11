@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# HabitLens
+
+**Understand Your Habits. Shape Your Future.**
+
+HabitLens is a calm, intelligent wellness companion that helps you see how small daily actions quietly influence your health, focus, and emotional well-being over time. By leveraging AI, it provides personalized insights and gentle projections to guide you toward a healthier daily rhythm.
+
+## Features
+
+-   **Consequence Prediction**: Quietly understand the short- and long-term impact of everyday habits.
+-   **Future Timeline**: See gentle projections of where your current routine may lead.
+-   **AI-Powered Insights**: Receive supportive insights, actionable suggestions, and a "Life Balance Score" powered by Google Gemini.
+-   **Guided Improvement**: Small, realistic steps toward better health.
+-   **User Authentication**: Secure login and signup via Firebase.
+
+## Tech Stack
+
+-   **Frontend**: [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/)
+-   **Styling**: [Tailwind CSS v4](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/) (Animations), [Lucide React](https://lucide.dev/) (Icons)
+-   **Backend / Database**: [Firebase](https://firebase.google.com/) (Auth, Firestore)
+-   **Artificial Intelligence**: [Google Gemini API](https://ai.google.dev/) (`@google/generative-ai`)
+-   **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+-   **Utilities**: `date-fns`, `clsx`, `tailwind-merge`
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+-   Node.js (v18+ recommended)
+-   npm or yarn
+-   A Firebase project
+-   A Google Gemini API key
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1.  **Clone the repository:**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    ```bash
+    git clone https://github.com/your-username/habitlens.git
+    cd habitlens
+    ```
 
-## Learn More
+2.  **Install dependencies:**
 
-To learn more about Next.js, take a look at the following resources:
+    ```bash
+    npm install
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3.  **Set up Environment Variables:**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+    Create a `.env.local` file in the root directory and add the following variables:
 
-## Deploy on Vercel
+    ```env
+    # Firebase Configuration
+    NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.firebasestorage.app
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+    NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    # Google Gemini API
+    # Note: The application specifically looks for 'GEMINI_API_KEY2'
+    GEMINI_API_KEY2=your_gemini_api_key
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4.  **Run the development server:**
+
+    ```bash
+    npm run dev
+    ```
+
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Project Structure
+
+-   `app/`: Next.js App Router pages and API routes.
+    -   `api/habit-advice/`: Backend logic for communicating with Gemini AI.
+-   `components/`: Reusable UI components.
+-   `firebase.js`: Firebase initialization and configuration.
+-   `store/`: Zustand state management stores.
+
+## AI Integration
+
+The `app/api/habit-advice/route.js` endpoint handles interactions with the Google Gemini API. It takes user habit data and context, sending it to the model to generate:
+-   A supportive insight.
+-   A gentle, actionable suggestion.
+-   A Life Balance Score (0-100).
+
+The system includes a fallback strategy that attempts multiple Gemini models (`gemini-2.5-flash`, `gemini-2.0-flash`, etc.) to ensure reliability.
+
+## License
+
+This project is licensed under the MIT License.
