@@ -223,7 +223,7 @@ export default function ResetLifePage() {
                             </p>
 
                             <div className="flex gap-4 mt-4">
-                                <Link href="/dashboard">
+                                <Link href="/explore">
                                     <button className="px-8 py-3 rounded-xl bg-white text-purple-900 font-bold shadow-lg hover:scale-105 transition-all flex items-center gap-2">
                                         Back to Dashboard <ArrowRight className="w-4 h-4" />
                                     </button>

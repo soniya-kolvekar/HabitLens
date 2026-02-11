@@ -46,7 +46,7 @@ export default function ExplorePage() {
             icon: RefreshCw,
             href: "/habit-replacement",
             color: "text-blue-300",
-            active: false
+            active: true
         }
     ];
 

@@ -1,6 +1,6 @@
 const https = require('https');
 
-const apiKey = 'AIzaSyABoTZxIRqXoGAXTf0s6KACR2PvUCYt-Bk'; // From .env.local
+const apiKey = GEMINI_API_KEY;
 const model = 'gemini-2.5-flash';
 const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
