@@ -2,7 +2,8 @@
 'use client';
 import { useState } from 'react';
 import { Loader2, Smile, Meh, Sun, Cloud, CloudRain } from 'lucide-react';
-import { auth } from '../../firebase';
+import { auth, db } from '../../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
 
@@ -17,7 +18,7 @@ export default function DailyCheckIn({ dailyEntries, onEntryAdded, setAnalysisRe
         reflection: ''
     });
 
-   
+
     const todayStr = new Date().toISOString().split('T')[0];
     const hasCheckedInToday = dailyEntries.some(entry => entry.date === todayStr);
 
@@ -58,11 +59,7 @@ export default function DailyCheckIn({ dailyEntries, onEntryAdded, setAnalysisRe
         setAnalyzing(true);
 
         try {
-<<<<<<< HEAD
-            
-=======
             // 1. Get AI Advice
->>>>>>> 51367da6df059a2dfd8dedfb0941319e5cd25776
             const res = await fetch('/api/habit-advice', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -76,7 +73,7 @@ export default function DailyCheckIn({ dailyEntries, onEntryAdded, setAnalysisRe
 
             if (aiData.error) throw new Error(aiData.error);
 
-        
+
             console.log("AI Data received:", aiData);
 
             // 2. Save to DB via API
@@ -94,24 +91,17 @@ export default function DailyCheckIn({ dailyEntries, onEntryAdded, setAnalysisRe
                 })
             });
 
-<<<<<<< HEAD
-            
             try {
                 const userId = auth.currentUser.uid;
                 await addDoc(collection(db, 'users', userId, 'daily_logs'), {
                     ...formData,
                     ...aiData,
-                    date: new Date().toISOString().split('T')[0], 
+                    date: new Date().toISOString().split('T')[0],
                     timestamp: serverTimestamp()
                 });
                 console.log("Saved to Firebase successfully");
             } catch (firebaseError) {
                 console.error("Firebase save failed:", firebaseError);
-              
-=======
-            if (!saveRes.ok) {
-                throw new Error("Failed to save habit entry");
->>>>>>> 51367da6df059a2dfd8dedfb0941319e5cd25776
             }
 
             // 3. Update State
@@ -131,11 +121,7 @@ export default function DailyCheckIn({ dailyEntries, onEntryAdded, setAnalysisRe
             <h2 className="text-2xl font-semibold mb-6 text-white font-sans">Daily Check-in</h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-<<<<<<< HEAD
-              
-=======
 
->>>>>>> 51367da6df059a2dfd8dedfb0941319e5cd25776
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-medium mb-2 text-white/80">Hours of Sleep ({formData.sleep})</label>
@@ -157,7 +143,7 @@ export default function DailyCheckIn({ dailyEntries, onEntryAdded, setAnalysisRe
                     </div>
                 </div>
 
-             
+
                 <div>
                     <label className="block text-sm font-medium mb-3 text-white/80">How are you feeling?</label>
                     <div className="flex justify-between gap-2 overflow-x-auto pb-2">
@@ -207,7 +193,7 @@ export default function DailyCheckIn({ dailyEntries, onEntryAdded, setAnalysisRe
                         "Save & Analyze"
                     )}
                 </button>
-            </form>
-        </div>
+            </form >
+        </div >
     );
 }
