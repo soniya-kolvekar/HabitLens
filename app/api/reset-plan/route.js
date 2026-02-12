@@ -73,7 +73,7 @@ export async function POST(req) {
 
         for (const modelName of models) {
             try {
-                // console.log(`ResetAPI: Trying model ${modelName}...`);
+
 
                 const response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY4}`,

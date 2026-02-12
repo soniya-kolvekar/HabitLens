@@ -12,8 +12,8 @@ export default function ResetLifePage() {
     const [habitData, setHabitData] = useState([]);
 
     const [isGenerating, setIsGenerating] = useState(false);
-    const [resetPlan, setResetPlan] = useState(null); // The one being generated
-    const [activePlan, setActivePlan] = useState(null); // The one saved in history
+    const [resetPlan, setResetPlan] = useState(null);
+    const [activePlan, setActivePlan] = useState(null);
     const [saveStatus, setSaveStatus] = useState('idle');
 
     useEffect(() => {
@@ -115,7 +115,6 @@ export default function ResetLifePage() {
     const toggleDayCompletion = async (dayIndex, currentStatus) => {
         if (!user || !activePlan?.id) return;
 
-        // Optimistic UI update
         const updatedDailyPlan = [...activePlan.daily_plan];
         updatedDailyPlan[dayIndex] = { ...updatedDailyPlan[dayIndex], completed: !currentStatus };
         setActivePlan({ ...activePlan, daily_plan: updatedDailyPlan });
@@ -133,14 +132,14 @@ export default function ResetLifePage() {
             });
 
             if (!res.ok) {
-                // Revert on failure
+
                 updatedDailyPlan[dayIndex] = { ...updatedDailyPlan[dayIndex], completed: currentStatus };
                 setActivePlan({ ...activePlan, daily_plan: updatedDailyPlan });
                 console.error("Failed to update status");
             }
         } catch (error) {
             console.error("Error updating status:", error);
-            // Revert on failure
+
             updatedDailyPlan[dayIndex] = { ...updatedDailyPlan[dayIndex], completed: currentStatus };
             setActivePlan({ ...activePlan, daily_plan: updatedDailyPlan });
         }
@@ -213,10 +212,10 @@ export default function ResetLifePage() {
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.2 + (i * 0.05) }}
                                 className={`rounded-xl p-5 border transition-all hover:-translate-y-1 relative overflow-hidden ${isCompleted
-                                        ? 'bg-emerald-500/10 border-emerald-500/30'
-                                        : i === 0 && !isInteractive
-                                            ? 'ring-2 ring-blue-400/50 bg-blue-500/10 border-white/10'
-                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                    ? 'bg-emerald-500/10 border-emerald-500/30'
+                                    : i === 0 && !isInteractive
+                                        ? 'ring-2 ring-blue-400/50 bg-blue-500/10 border-white/10'
+                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
                                     }`}
                             >
                                 {isInteractive && (
@@ -224,8 +223,8 @@ export default function ResetLifePage() {
                                         <button
                                             onClick={() => toggleDayCompletion(i, day.completed)}
                                             className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${isCompleted
-                                                    ? 'bg-emerald-500 border-emerald-500 text-white'
-                                                    : 'border-white/30 hover:border-white/60'
+                                                ? 'bg-emerald-500 border-emerald-500 text-white'
+                                                : 'border-white/30 hover:border-white/60'
                                                 }`}
                                         >
                                             {isCompleted && <CheckCircle2 className="w-4 h-4" />}
@@ -297,7 +296,6 @@ export default function ResetLifePage() {
                     </p>
                 </div>
 
-                {/* 1. Loading State */}
                 {isGenerating && (
                     <div className="flex flex-col items-center justify-center py-20 space-y-6">
                         <div className="relative">
@@ -308,7 +306,6 @@ export default function ResetLifePage() {
                     </div>
                 )}
 
-                {/* 2. New Plan Generated (Draft) */}
                 {!isGenerating && resetPlan && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
                         {renderPlanContent(resetPlan, false)}
@@ -346,7 +343,6 @@ export default function ResetLifePage() {
                     </div>
                 )}
 
-                {/* 3. Active Saved Plan (Tracking Mode) */}
                 {!isGenerating && !resetPlan && activePlan && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
                         <div className="flex items-center justify-between mb-8">
@@ -374,7 +370,6 @@ export default function ResetLifePage() {
                     </div>
                 )}
 
-                {/* 4. Generator (Default state if no active plan and no draft) */}
                 {!isGenerating && !resetPlan && !activePlan && (
                     <div className="flex flex-col items-center justify-center py-12 space-y-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-xl">
                         <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center">

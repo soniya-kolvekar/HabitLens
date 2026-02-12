@@ -12,9 +12,6 @@ export const calculateStreak = (entries) => {
 
     const lastEntryDate = parseISO(sorted[0].date);
 
-    // If the last entry wasn't today or yesterday, streak is broken (0)
-    // UNLESS the user just added an entry for today, but we are fetching from DB and it might not be updated yet? 
-    // Actually, we pass the updated list to this function.
     if (!isSameDay(lastEntryDate, today) && !isSameDay(lastEntryDate, yesterday)) {
         return 0;
     }
@@ -36,10 +33,8 @@ export const calculateStreak = (entries) => {
             streakCount++;
             currentDate = entryDate;
         } else if (isSameDay(entryDate, currentDate)) {
-            // Multiple entries on same day, ignore
             continue;
         } else {
-            // Gap found
             break;
         }
     }
