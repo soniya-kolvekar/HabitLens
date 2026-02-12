@@ -1,26 +1,110 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-const apiKey = process.env.GEMINI_API_KEY3 || "AIzaSyB9RQYngQsh7bOAGkqYty9oqWGJwIuciXU";
-const genAI = new GoogleGenerativeAI(apiKey);
+
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function POST(req) {
   try {
     const { activity } = await req.json();
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
-    const prompt = `Analyze risk of: ${activity}. Return ONLY JSON: {"riskLevel": "Low/Med/High", "shortTerm": [], "longTerm": [], "healthScore": 0-100}`;
+    // 1. Collect all potential API keys
+    // Prioritizing GEMINI_API_KEY3 as requested
+    const potentialKeys = [
+      process.env.GEMINI_API_KEY3,
+      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY2,
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    ].filter(key => key && key.length > 10);
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    const cleanJson = text.replace(/```json|```/g, "").trim();
-    return NextResponse.json(JSON.parse(cleanJson));
+    console.log(`Risk API: Found ${potentialKeys.length} potential keys.`);
+
+    if (potentialKeys.length === 0) {
+      throw new Error("No API Keys found in .env.local");
+    }
+
+    const prompt = `
+      Analyze the health risk of: "${activity}".
+      Return ONLY valid JSON in this format:
+      {
+        "riskLevel": "Low" or "Medium" or "High",
+        "shortTerm": ["Immediate impact 1", "Immediate impact 2"],
+        "longTerm": ["Long term consequence 1", "Long term consequence 2"],
+        "healthScore": 0-100 (integer)
+      }
+    `;
+
+    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro-latest"];
+    let finalData = null;
+    let lastError = null;
+
+    // 2. Robust Loop: Try keys and models
+    for (let k = 0; k < potentialKeys.length; k++) {
+      const apiKey = potentialKeys[k];
+      const genAI = new GoogleGenerativeAI(apiKey);
+      console.log(`Risk API: Trying Key #${k + 1}...`);
+
+      for (const modelName of models) {
+        try {
+          const model = genAI.getGenerativeModel({ model: modelName, generationConfig: { responseMimeType: "application/json" } });
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          const text = response.text();
+
+          if (!text) throw new Error("No text response");
+
+          const cleanJson = text.replace(/```json|```/g, "").trim();
+
+          // Try to parse JSON
+          try {
+            finalData = JSON.parse(cleanJson);
+          } catch (e) {
+            console.warn(`Risk API: JSON Parse Error on model ${modelName}`);
+            continue;
+          }
+
+          if (finalData.riskLevel) {
+            console.log(`Risk API: Success with Key #${k + 1} and ${modelName}`);
+            break;
+          }
+        } catch (e) {
+          console.warn(`Risk API: Failed with Key #${k + 1}/${modelName}: ${e.message}`);
+          lastError = e;
+          if (e.message.includes("429")) await delay(1000);
+        }
+      }
+      if (finalData) break;
+    }
+
+    if (!finalData) {
+      throw lastError || new Error("All models provided by keys failed");
+    }
+
+    return NextResponse.json(finalData);
 
   } catch (error) {
-    console.error("Gemini Error:", error.message);
+    console.error("Risk API Critical Error:", error.message);
+
+    // Return specific error message to UI
+    let errorMsg = "AI Service Unavailable";
+    const msg = error.message.toLowerCase();
+
+    if (msg.includes("403") || msg.includes("leaked") || msg.includes("permission")) {
+      errorMsg = "Invalid API Key (Key Revoked/Leaked)";
+    } else if (msg.includes("429") || msg.includes("quota")) {
+      errorMsg = "Rate Limit Exceeded";
+    } else if (msg.includes("not found")) {
+      errorMsg = "Model Not Found (Key lacks access)";
+    } else if (msg.includes("no api keys")) {
+      errorMsg = "Missing API Key in .env.local";
+    } else {
+      errorMsg = error.message.replace("GoogleGenerativeAI Error:", "").slice(0, 50);
+    }
+
     return NextResponse.json({
-      riskLevel: "Unknown",
-      shortTerm: ["Check API Key in .env.local"],
-      longTerm: ["Restart npm run dev"],
-      healthScore: 50
+      riskLevel: "Error",
+      shortTerm: [`Error: ${errorMsg}`],
+      longTerm: ["Check Server Logs"],
+      healthScore: 0
     });
   }
 }
