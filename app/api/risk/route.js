@@ -7,8 +7,6 @@ export async function POST(req) {
   try {
     const { activity } = await req.json();
 
-    // 1. Collect all potential API keys
-    // Prioritizing GEMINI_API_KEY3 as requested
     const potentialKeys = [
       process.env.GEMINI_API_KEY3,
       process.env.GEMINI_API_KEY,
@@ -16,7 +14,7 @@ export async function POST(req) {
       process.env.NEXT_PUBLIC_GEMINI_API_KEY
     ].filter(key => key && key.length > 10);
 
-    console.log(`Risk API: Found ${potentialKeys.length} potential keys.`);
+
 
     if (potentialKeys.length === 0) {
       throw new Error("No API Keys found in .env.local");
@@ -37,11 +35,9 @@ export async function POST(req) {
     let finalData = null;
     let lastError = null;
 
-    // 2. Robust Loop: Try keys and models
     for (let k = 0; k < potentialKeys.length; k++) {
       const apiKey = potentialKeys[k];
       const genAI = new GoogleGenerativeAI(apiKey);
-      console.log(`Risk API: Trying Key #${k + 1}...`);
 
       for (const modelName of models) {
         try {
@@ -54,20 +50,16 @@ export async function POST(req) {
 
           const cleanJson = text.replace(/```json|```/g, "").trim();
 
-          // Try to parse JSON
           try {
             finalData = JSON.parse(cleanJson);
           } catch (e) {
-            console.warn(`Risk API: JSON Parse Error on model ${modelName}`);
             continue;
           }
 
           if (finalData.riskLevel) {
-            console.log(`Risk API: Success with Key #${k + 1} and ${modelName}`);
             break;
           }
         } catch (e) {
-          console.warn(`Risk API: Failed with Key #${k + 1}/${modelName}: ${e.message}`);
           lastError = e;
           if (e.message.includes("429")) await delay(1000);
         }
@@ -82,9 +74,6 @@ export async function POST(req) {
     return NextResponse.json(finalData);
 
   } catch (error) {
-    console.error("Risk API Critical Error:", error.message);
-
-    // Return specific error message to UI
     let errorMsg = "AI Service Unavailable";
     const msg = error.message.toLowerCase();
 

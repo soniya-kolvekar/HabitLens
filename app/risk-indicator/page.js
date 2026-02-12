@@ -41,7 +41,7 @@ export default function RiskIndicator() {
   };
   return (
     <div className={`min-h-screen bg-gradient-to-br transition-all duration-1000 flex items-center justify-center p-6 ${getBg()} relative overflow-hidden`}>
-      {/* Interactive Background Gradient Orb */}
+
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-40 transition-opacity duration-1000"
         style={{
@@ -50,13 +50,18 @@ export default function RiskIndicator() {
               `
         }}
       />
-      {/* Secondary Ambient Orbs */}
+
       <div className="pointer-events-none fixed top-[-10%] md:left-[-10%] left-[0%] w-[500px] h-[500px] bg-tattva-orange/20 rounded-full blur-[100px] animate-pulse" />
       <div className="pointer-events-none fixed bottom-[-10%] md:right-[-10%] right-[0%] w-[600px] h-[600px] bg-tattva-teal/20 rounded-full blur-[120px] animate-pulse delay-1000" />
 
       <div className="w-full max-w-2xl bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 shadow-2xl text-white relative z-10">
 
-        <div className="flex flex-col items-center mb-8 text-center">
+        <Link href="/explore" className="absolute top-8 left-8 text-white/50 hover:text-white flex items-center gap-2 transition-colors group">
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="uppercase tracking-widest text-xs font-bold">Back</span>
+        </Link>
+
+        <div className="flex flex-col items-center mb-8 text-center mt-8">
           <h1 className="text-3xl font-black tracking-tighter uppercase mb-1">Risk Indicator</h1>
           <p className="text-white/50 text-xs tracking-widest uppercase">Behavioral Impact & Threat Matrix</p>
         </div>

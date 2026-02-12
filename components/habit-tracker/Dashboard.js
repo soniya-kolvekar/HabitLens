@@ -10,23 +10,50 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { calculateStreak } from '../../utils/habitUtils';
+import useHabitStore from '../../store/useHabitStore';
 
 export default function Dashboard() {
     const [user, setUser] = useState(null);
-    const [dailyEntries, setDailyEntries] = useState([]);
-    const [streak, setStreak] = useState(0);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    // const [dailyEntries, setDailyEntries] = useState([]); // Use store
+    // const [streak, setStreak] = useState(0); // Use store
+    // const [isModalOpen, setIsModalOpen] = useState(false); // Use store
+    // const [selectedDate, setSelectedDate] = useState(new Date()); // Use store
 
-    const [analysisResult, setAnalysisResult] = useState({
-        insight: null,
-        score: null,
-        suggestion: null,
-        mood: null,
-        sleep: null,
-        productivity: null,
-        reflection: null
-    });
+    const {
+        dailyEntries,
+        setDailyEntries,
+        streak,
+        setStreak: setStoreStreak, // Store doesn't have setStreak exposed directly but calculates it? 
+        // Checking store definition: 
+        // calculateStreak is internal or exposed? It's defined in create({... calculateStreak: ...}) so it is exposed.
+        // But we need to update streak when we fetch.
+
+        isModalOpen,
+        setIsModalOpen,
+        selectedDate,
+        setSelectedDate,
+
+        // Analysis result parts
+        currentInsight,
+        currentScore,
+        currentSuggestion,
+        currentMood,
+        currentSleep,
+        currentProductivity,
+        currentReflection,
+        setAnalysisResult
+    } = useHabitStore();
+
+    // Construct analysisResult object for components that expect it
+    const analysisResult = {
+        insight: currentInsight,
+        score: currentScore,
+        suggestion: currentSuggestion,
+        mood: currentMood,
+        sleep: currentSleep,
+        productivity: currentProductivity,
+        reflection: currentReflection
+    };
 
     const fetchHabits = useCallback(async (userId) => {
         try {
@@ -34,7 +61,7 @@ export default function Dashboard() {
             if (res.ok) {
                 const data = await res.json();
                 setDailyEntries(data);
-                setStreak(calculateStreak(data));
+                calculateStreak(data);
 
                 // If we have data, set the most recent one as current insight if it's today
                 if (data.length > 0) {
@@ -78,28 +105,7 @@ export default function Dashboard() {
         }
     };
 
-    const handleSelectDate = (date) => {
-        setSelectedDate(date);
-        setIsModalOpen(true);
-        // Find entry for this date
-        // Note: date from calendar is a Date object, entry.date is YYYY-MM-DD string
-        // We need to compare carefully.
-        const dateStr = date.toISOString().split('T')[0];
-        // However, local time zone issues might arise with simple toISOString split if not careful.
-        // Let's rely on the comparison logic from CalendarHistory or similar, 
-        // but here we just need to pass data to the modal.
 
-        // Actually, CalendarHistory was doing the finding.
-        // Let's pass the finder logic or let CalendarHistory pass the found data back up?
-        // Better: Dashboard holds the state. CalendarHistory notifies "User selected Date X".
-        // Dashboard finds the data and opens modal.
-
-        // Wait, prior implementation had CalendarHistory setting the analysis result in store.
-        // Let's replicate that logic here or inside CalendarHistory?
-        // Standard React pattern: Lift state up.
-        // Dashboard has `dailyEntries`. CalendarHistory receives `dailyEntries`.
-        // CalendarHistory calls `onSelectDate(date, entryData)`.
-    };
 
     // Derived state for modal
     // Actually, let's keep it simple. `analysisResult` is effectively "Current View"
@@ -162,12 +168,7 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        <CalendarHistory
-                            dailyEntries={dailyEntries}
-                            setAnalysisResult={setAnalysisResult}
-                            setIsModalOpen={setIsModalOpen}
-                            setSelectedDate={setSelectedDate}
-                        />
+                        <CalendarHistory />
 
                     </div>
                 </div>

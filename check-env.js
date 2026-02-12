@@ -16,26 +16,20 @@ async function checkEnv() {
         return;
     }
 
-    // 2. Parse for GEMINI_API_KEY3
     const key3Match = envContent.match(/GEMINI_API_KEY3=(AIza[a-zA-Z0-9_\-]+)/);
     const key1Match = envContent.match(/GEMINI_API_KEY=(AIza[a-zA-Z0-9_\-]+)/);
 
     let activeKey = null;
 
     if (key3Match) {
-        console.log("✅ GEMINI_API_KEY3 found: " + key3Match[1].slice(0, 10) + "...");
         activeKey = key3Match[1];
-    } else {
-        console.log("❌ GEMINI_API_KEY3 NOT found in .env.local");
     }
 
     if (key1Match) {
-        console.log("ℹ️  GEMINI_API_KEY found: " + key1Match[1].slice(0, 10) + "...");
         if (!activeKey) activeKey = key1Match[1];
     }
 
     if (!activeKey) {
-        console.error("❌ No valid API keys starting with 'AIza' found.");
         return;
     }
 
