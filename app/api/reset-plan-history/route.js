@@ -12,11 +12,10 @@ export async function GET(request) {
     }
 
     try {
+        // Remove orderBy to avoid composite index requirement
         const q = query(
             collection(db, 'users', userId, 'reset_plans'),
-            where('status', '==', 'active'),
-            orderBy('createdAt', 'desc'),
-            limit(1)
+            where('status', '==', 'active')
         );
 
         const snapshot = await getDocs(q);
@@ -25,8 +24,15 @@ export async function GET(request) {
             return NextResponse.json(null);
         }
 
-        const docData = snapshot.docs[0].data();
-        return NextResponse.json({ id: snapshot.docs[0].id, ...docData });
+        // Sort in memory to find the most recent one
+        const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        plans.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return dateB - dateA; // Descending order
+        });
+
+        return NextResponse.json(plans[0]);
 
     } catch (error) {
         console.error("Error fetching reset plan:", error);
@@ -43,9 +49,19 @@ export async function POST(request) {
             return NextResponse.json({ error: 'UserId and plan data are required' }, { status: 400 });
         }
 
-        // Optional: Mark previous active plans as archived?
-        // For now, simpler to just rely on "latest active" logic in GET.
+        // 1. Archive any existing active plans
+        const q = query(
+            collection(db, 'users', userId, 'reset_plans'),
+            where('status', '==', 'active')
+        );
+        const snapshot = await getDocs(q);
 
+        const archivePromises = snapshot.docs.map(doc =>
+            updateDoc(doc.ref, { status: 'archived' })
+        );
+        await Promise.all(archivePromises);
+
+        // 2. Add the new active plan
         const docRef = await addDoc(collection(db, 'users', userId, 'reset_plans'), {
             ...plan,
             createdAt: serverTimestamp(),

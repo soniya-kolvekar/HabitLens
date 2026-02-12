@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, Moon, Sun, Calendar, CheckCircle2, ArrowRight } from 'lucide-react';
 import useHabitStore from '../../store/useHabitStore';
@@ -14,21 +14,37 @@ export default function ResetModal() {
         resetPlan,
         setResetPlan,
         isGeneratingReset,
-        setGeneratingReset
+        setGeneratingReset,
+        fetchActiveResetPlan
     } = useHabitStore();
 
-    const [saveStatus, setSaveStatus] = useState('idle'); 
+    const [saveStatus, setSaveStatus] = useState('idle');
+    const [isInitializing, setIsInitializing] = useState(true);
 
     useEffect(() => {
-        if (isResetModalOpen && !resetPlan && !isGeneratingReset) {
-            generatePlan();
-        }
-    }, [isResetModalOpen]);
+        let mounted = true;
 
-    const generatePlan = async () => {
+        async function init() {
+            if (isResetModalOpen && auth.currentUser) {
+                setIsInitializing(true);
+                const plan = await fetchActiveResetPlan(auth.currentUser.uid);
+
+                if (mounted && !plan && !isGeneratingReset) {
+                    // No active plan found, so generate a new one
+                    generatePlan();
+                }
+                if (mounted) setIsInitializing(false);
+            }
+        }
+
+        init();
+
+        return () => { mounted = false; };
+    }, [isResetModalOpen, fetchActiveResetPlan, generatePlan, isGeneratingReset]);
+
+    const generatePlan = useCallback(async () => {
         setGeneratingReset(true);
         try {
-
             const recentHabits = dailyEntries.slice(0, 14);
 
             const res = await fetch('/api/reset-plan', {
@@ -46,25 +62,35 @@ export default function ResetModal() {
             setResetPlan(data);
         } catch (error) {
             console.error(error);
-   
         } finally {
             setGeneratingReset(false);
         }
-    };
+    }, [dailyEntries, setGeneratingReset, setResetPlan]);
 
     const handleSavePlan = async () => {
         if (!auth.currentUser || !resetPlan) return;
         setSaveStatus('saving');
         try {
-            await addDoc(collection(db, 'users', auth.currentUser.uid, 'reset_plans'), {
-                ...resetPlan,
-                createdAt: serverTimestamp(),
-                startDate: new Date().toISOString(),
-                status: 'active'
+            // The API now handles archiving old plans
+            const res = await fetch('/api/reset-plan-history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: auth.currentUser.uid,
+                    plan: resetPlan
+                })
             });
+
+            if (!res.ok) throw new Error("Failed to save plan");
+
+            // Refresh to ensure we have the ID and correct status
+            await fetchActiveResetPlan(auth.currentUser.uid);
+
             setSaveStatus('saved');
             setTimeout(() => {
-                setResetModalOpen(false);
+                // Keep modal open or close it? User might want to see the "Saved!" state
+                // Original code closed it:
+                // setResetModalOpen(false);
                 setSaveStatus('idle');
             }, 2000);
         } catch (error) {
@@ -106,15 +132,21 @@ export default function ResetModal() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                        {isGeneratingReset ? (
+                        {isGeneratingReset || isInitializing ? (
                             <div className="h-full flex flex-col items-center justify-center py-20 text-center space-y-6">
                                 <div className="relative">
                                     <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-full animate-pulse" />
                                     <Loader2 className="w-16 h-16 text-purple-400 animate-spin relative z-10" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-xl font-medium text-white">Analyzing your patterns...</h3>
-                                    <p className="text-white/50 max-w-md">finding the best way to help you pause, breathe, and restart.</p>
+                                    <h3 className="text-xl font-medium text-white">
+                                        {isInitializing ? "Checking your history..." : "Analyzing your patterns..."}
+                                    </h3>
+                                    <p className="text-white/50 max-w-md">
+                                        {isInitializing
+                                            ? "looking for active reset plans"
+                                            : "finding the best way to help you pause, breathe, and restart."}
+                                    </p>
                                 </div>
                             </div>
                         ) : resetPlan ? (
@@ -237,8 +269,8 @@ export default function ResetModal() {
                                     onClick={handleSavePlan}
                                     disabled={saveStatus === 'saving' || saveStatus === 'saved'}
                                     className={`flex-1 md:flex-none px-8 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 ${saveStatus === 'saved'
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-white text-purple-900 hover:scale-[1.02]'
+                                        ? 'bg-green-500 text-white'
+                                        : 'bg-white text-purple-900 hover:scale-[1.02]'
                                         }`}
                                 >
                                     {saveStatus === 'saving' ? (
